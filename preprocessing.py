@@ -1,7 +1,9 @@
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import re
+from wordcloud import WordCloud
 # label encoding
 from sklearn.preprocessing import LabelEncoder
 # test train split
@@ -47,6 +49,7 @@ def preprocess_data():
 def vectorize_data(data, uoft_data=None):
     # vectorizer = TfidfVectorizer()
     # vectorize data and dimension reduction
+    # ignore common English stopwords when transforming the text data
     vectorizer = TfidfVectorizer(stop_words="english", max_features=10000)
     X_train = vectorizer.fit_transform(data["Email Text"]).toarray()
     y_train = np.array(data["Email Type"])
@@ -86,27 +89,53 @@ def load_data_uoft_kaggle_separate_test():
     # have 2 test sets, one for kaggle and one for uoft
     return X_train, X_valid, X_test, y_train, y_valid, y_test, X_uoft, y_uoft
 
-# if __name__ == '__main__':
-#     kaggle_data, uoft_data = preprocess_data()
-#     # print how many phishing and safe emails
-#     print(kaggle_data["Email Type"].value_counts())
-#     print(kaggle_data.head())
-#     print(kaggle_data.columns)
+def create_wordcloud(data, title, filter_label=None, file_name=None):
+    if filter_label is not None:
+        filtered_data = data[data["Email Type"] == filter_label]
+    else:
+        filtered_data = data
+    
+    text = " ".join(filtered_data["Email Text"])
+    wordcloud = WordCloud(width=800, height=800, 
+                          background_color='white', 
+                          stopwords=None, 
+                          min_font_size=10).generate(text)
+    
+    plt.figure(figsize=(8, 8), facecolor=None) 
+    plt.imshow(wordcloud, interpolation="bilinear") 
+    plt.axis("off")
+    plt.title(title, fontsize=20)
+    plt.tight_layout(pad=0) 
+    if file_name:
+        plt.savefig(file_name)
+    plt.show()
 
-#     print(uoft_data["Email Type"].value_counts())
-#     print(uoft_data.head())
-#     print(uoft_data.columns)
+def show_distribution(data, title, file_name=None):
+    plt.pie(data["Email Type"].value_counts(), labels=["Phishing", "Safe"], autopct='%1.1f%%')
+    plt.title(title)
+    if file_name:
+        plt.savefig(file_name)
+    plt.show()
 
-#     # display distribution
-#     plt.pie(kaggle_data["Email Type"].value_counts(), labels=["Phishing", "Safe"], autopct='%1.1f%%')
-#     plt.title('Categorical Distribution of Safe and Phishing Emails')
-#     plt.show()
+def show_visualizations():
+    kaggle_data, uoft_data = preprocess_data()
 
-#     plt.pie(uoft_data["Email Type"].value_counts(), labels=["Phishing", "Safe"], autopct='%1.1f%%')
-#     plt.title('Categorical Distribution of Safe and Phishing Emails')
-#     plt.show()
+    # Create directory if it doesn't exist
+    os.makedirs("visualizations", exist_ok=True)
 
-#     X, X_uoft, y, y_uoft = vectorize_data(kaggle_data, uoft_data)
+    # distribution of phishing and safe emails
+    show_distribution(kaggle_data, "Kaggle Dataset Categorical Distribution of Safe and Phishing Emails", file_name="visualizations/kaggle_distribution.png")
+    show_distribution(uoft_data, "UofT Dataset Categorical Distribution of Safe and Phishing Emails", file_name="visualizations/uoft_distribution.png")
 
-#     X_train, X_valid, X_test, y_train, y_valid, y_test = split_data(X, y)
+    # word clouds for phishing emails
+    create_wordcloud(kaggle_data, "Kaggle Dataset Phishing Email WordCloud", filter_label=0, file_name="visualizations/kaggle_phishing_wordcloud.png")
+    create_wordcloud(uoft_data, "UofT Dataset Phishing Email WordCloud", filter_label=0, file_name="visualizations/uoft_phishing_wordcloud.png")
+
+    # word clouds for safe emails
+    create_wordcloud(kaggle_data, "Kaggle Dataset Safe Email WordCloud", filter_label=1, file_name="visualizations/kaggle_safe_wordcloud.png")
+    create_wordcloud(uoft_data, "UofT Dataset Safe Email WordCloud", filter_label=1, file_name="visualizations/uoft_safe_wordcloud.png")
+
+if __name__ == '__main__':
+    show_visualizations()
+    
     

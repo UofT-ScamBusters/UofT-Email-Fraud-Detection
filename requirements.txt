@@ -5,3 +5,4 @@ torch
 scipy
 matplotlib
 pickle
+wordcloud
