@@ -27,15 +27,36 @@ def preprocess_data():
     # label encoding: phishing = 0, safe = 1
     le = LabelEncoder()
     data["Email Type"] = le.fit_transform(data["Email Type"])
-    return data
 
-def vectorize_data(data):
+    ###############################################################
+
+    # load uoft data
+    uoft_data = pd.read_csv("data/uoft_phishing_email.csv")
+    uoft_data = uoft_data.drop(columns=["Unnamed: 0"], axis=1)
+    uoft_data = uoft_data.dropna()
+    uoft_data = uoft_data.drop_duplicates()
+    uoft_data["Email Text"] = uoft_data["Email Text"].apply(lambda x: re.sub(r'http\S+', '', x))
+    uoft_data["Email Text"] = uoft_data["Email Text"].apply(lambda x: re.sub(r'[^\w\s]', '', x))
+    uoft_data["Email Text"] = uoft_data["Email Text"].apply(lambda x: re.sub(r'\s+', ' ', x))
+    uoft_data["Email Text"] = uoft_data["Email Text"].apply(lambda x: x.strip())
+    uoft_data["Email Text"] = uoft_data["Email Text"].apply(lambda x: x.lower())
+    uoft_data["Email Type"] = le.fit_transform(uoft_data["Email Type"])
+
+    return data, uoft_data
+
+def vectorize_data(data, uoft_data=None):
     # vectorizer = TfidfVectorizer()
     # vectorize data and dimension reduction
     vectorizer = TfidfVectorizer(stop_words="english", max_features=10000)
-    X = vectorizer.fit_transform(data["Email Text"]).toarray()
-    y = np.array(data["Email Type"])
-    return X, y
+    X_train = vectorizer.fit_transform(data["Email Text"]).toarray()
+    y_train = np.array(data["Email Type"])
+    
+    if uoft_data is not None:
+        X_uoft = vectorizer.transform(uoft_data["Email Text"]).toarray()
+        y_uoft = np.array(uoft_data["Email Type"])
+        return X_train, X_uoft, y_train, y_uoft
+    
+    return X_train, y_train
 
 def split_data(X, y):
     # split data into train (70%), validation (15%), test sets (15%)
@@ -44,21 +65,48 @@ def split_data(X, y):
     return X_train, X_valid, X_test, y_train, y_valid, y_test
 
 def load_data():
-    data = preprocess_data()
-    X, y = vectorize_data(data)
+    kaggle_data, uoft_data = preprocess_data()
+    X, X_uoft, y, y_uoft = vectorize_data(kaggle_data, uoft_data)
     X_train, X_valid, X_test, y_train, y_valid, y_test = split_data(X, y)
     return X_train, X_valid, X_test, y_train, y_valid, y_test
 
+def load_data_uoft_kaggle_merged_test():
+    kaggle_data, uoft_data = preprocess_data()
+    X, X_uoft, y, y_uoft = vectorize_data(kaggle_data, uoft_data)
+    X_train, X_valid, X_test, y_train, y_valid, y_test = split_data(X, y)
+    # include uoft data in test set
+    X_test = np.concatenate((X_test, X_uoft), axis=0)
+    y_test = np.concatenate((y_test, y_uoft), axis=0)
+    return X_train, X_valid, X_test, y_train, y_valid, y_test
+
+def load_data_uoft_kaggle_separate_test():
+    kaggle_data, uoft_data = preprocess_data()
+    X, X_uoft, y, y_uoft = vectorize_data(kaggle_data, uoft_data)
+    X_train, X_valid, X_test, y_train, y_valid, y_test = split_data(X, y)
+    # have 2 test sets, one for kaggle and one for uoft
+    return X_train, X_valid, X_test, y_train, y_valid, y_test, X_uoft, y_uoft
+
 # if __name__ == '__main__':
-#     data = preprocess_data()
+#     kaggle_data, uoft_data = preprocess_data()
 #     # print how many phishing and safe emails
-#     print(data["Email Type"].value_counts())
-#     print(data.head())
-#     print(data.columns)
+#     print(kaggle_data["Email Type"].value_counts())
+#     print(kaggle_data.head())
+#     print(kaggle_data.columns)
+
+#     print(uoft_data["Email Type"].value_counts())
+#     print(uoft_data.head())
+#     print(uoft_data.columns)
+
 #     # display distribution
-#     plt.pie(data["Email Type"].value_counts(), labels=["Phishing", "Safe"], autopct='%1.1f%%')
+#     plt.pie(kaggle_data["Email Type"].value_counts(), labels=["Phishing", "Safe"], autopct='%1.1f%%')
 #     plt.title('Categorical Distribution of Safe and Phishing Emails')
 #     plt.show()
-#     X, y = vectorize_data(data)
+
+#     plt.pie(uoft_data["Email Type"].value_counts(), labels=["Phishing", "Safe"], autopct='%1.1f%%')
+#     plt.title('Categorical Distribution of Safe and Phishing Emails')
+#     plt.show()
+
+#     X, X_uoft, y, y_uoft = vectorize_data(kaggle_data, uoft_data)
+
 #     X_train, X_valid, X_test, y_train, y_valid, y_test = split_data(X, y)
     

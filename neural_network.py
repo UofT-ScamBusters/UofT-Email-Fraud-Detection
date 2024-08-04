@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.autograd import Variable
 from torch.utils.data import DataLoader, TensorDataset
-from preprocessing import load_data
+from preprocessing import load_data, load_data_uoft_kaggle_merged_test, load_data_uoft_kaggle_separate_test
 
 # Neural Network Hyperparameters
 HIDDEN_SIZE = 50 # number of neurons in the hidden layer
@@ -140,9 +140,21 @@ def get_predictions(model, data_loader):
     return np.array(int_array)
 
 if __name__ == "__main__":
-    X_train, X_valid, X_test, y_train, y_valid, y_test = load_data()
+    # test data is just kaggle data
+    # X_train, X_valid, X_test, y_train, y_valid, y_test = load_data()
+
+    # test data is kaggle data and uoft data merged
+    # X_train, X_valid, X_test, y_train, y_valid, y_test = load_data_uoft_kaggle_merged_test()
+
+    # test data is kaggle data and uoft data separate
+    X_train, X_valid, X_test, y_train, y_valid, y_test, X_uoft, y_uoft = load_data_uoft_kaggle_separate_test()
+
+    # below is using kaggle data as test data
     train_loader, valid_loader, test_loader = load_data_for_nn(X_train, X_valid, X_test, y_train, y_valid, y_test)
     
+    # below is using uoft data as test data
+    # train_loader, valid_loader, test_loader = load_data_for_nn(X_train, X_valid, X_uoft, y_train, y_valid, y_uoft)
+
     model = NeuralNetwork(input_size=X_train.shape[1], hidden_size=HIDDEN_SIZE, output_size=1) # for binary classification, output_size should be 1
     criterion = nn.BCELoss() # binary cross entropy loss
     optimizer = optim.SGD(model.parameters(), lr=LEARNING_RATE, weight_decay=LAMBDA) # stochastic gradient descent
@@ -150,8 +162,9 @@ if __name__ == "__main__":
     train(model, criterion, optimizer, train_loader, valid_loader, NUM_EPOCHS)
 
     # this is how you get predictions for data (ex. test data in this case)
-    # test_predictions = get_predictions(model, test_loader)
+    test_predictions = get_predictions(model, test_loader)
+    print(len(test_predictions))
     
     # TODO: Test Decision Tree (when done tuning hyperparameters)
-    # test_accuracy = evaluate(model, test_loader)
-    # print(f'Final Test Accuracy: {test_accuracy:.4f}')
+    test_accuracy = evaluate(model, test_loader)
+    print(f'Final Test Accuracy: {test_accuracy:.4f}')
