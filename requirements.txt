@@ -4,3 +4,4 @@ scikit-learn
 torch
 scipy
 matplotlib
+pickle
