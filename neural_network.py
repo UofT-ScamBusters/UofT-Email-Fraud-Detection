@@ -107,15 +107,37 @@ def evaluate(model, test_loader):
     
     correct = 0
     total = 0
-    for data, labels in test_loader:
-        labels = labels.unsqueeze(1)  # Ensure labels have shape [batch_size, 1]
-        outputs = model(data)
-        predicted = (outputs > 0.5).float()
-        total += labels.size(0)
-        correct += (predicted == labels).sum().item()
+    
+    with torch.no_grad(): 
+        for data, labels in test_loader:
+            labels = labels.unsqueeze(1)  # Ensure labels have shape [batch_size, 1]
+            outputs = model(data)
+            predicted = (outputs > 0.5).float()
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
     
     accuracy = correct / total
     return accuracy
+
+def get_predictions(model, data_loader):
+    """
+    Get the predicted labels from the neural network model.
+
+    :param model: NeuralNetwork
+    :param data_loader: DataLoader
+    :return: np.ndarray of predictions (0 or 1)
+    """
+    model.eval()  
+
+    predictions = []
+    with torch.no_grad(): 
+        for data, _ in data_loader:
+            outputs = model(data)
+            predicted = (outputs > 0.5).float() 
+            predictions.extend(predicted.squeeze().cpu().numpy())  # Convert to numpy array
+
+    int_array = np.array(predictions).astype(int)
+    return np.array(int_array)
 
 if __name__ == "__main__":
     X_train, X_valid, X_test, y_train, y_valid, y_test = load_data()
@@ -129,7 +151,10 @@ if __name__ == "__main__":
     optimizer = optim.SGD(model.parameters(), lr=LEARNING_RATE, weight_decay=LAMBDA) # stochastic gradient descent
     
     train(model, criterion, optimizer, train_loader, valid_loader, NUM_EPOCHS)
+
+    # this is how you get predictions for data (ex. test data in this case)
+    # test_predictions = get_predictions(model, test_loader)
     
     # TODO: Test Decision Tree (when done tuning hyperparameters)
-    # final_accuracy = evaluate(model, test_loader)
-    # print(f'Final Test Accuracy: {final_accuracy:.4f}')
+    # test_accuracy = evaluate(model, test_loader)
+    # print(f'Final Test Accuracy: {test_accuracy:.4f}')
