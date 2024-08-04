@@ -5,7 +5,7 @@ from preprocessing import load_data
 # Tree Hyperparameters
 CRITERION = 'gini' # ['gini', 'entropy']
 SPLITTER = 'best' # ['best', 'random']
-MAX_TREE_DEPTH = 16 # any reasonable number
+MAX_TREE_DEPTH = 25 # any reasonable number
 RANDOM_STATE = 30
 
 def create_decision_tree(X_train, y_train) -> DecisionTreeClassifier:
@@ -123,7 +123,7 @@ if __name__ == "__main__":
     run_train_valid(X_train, y_train, X_valid, y_valid)
 
     # TODO: if you want to batch test hyperparameters, uncomment the following line and input ur own parameters.
-    # try_hyperparameters(X_train, y_train, X_valid, y_valid, ['gini', 'entropy'], ['best'], [12, 16]) 
+    try_hyperparameters(X_train, y_train, X_valid, y_valid, ['gini', 'entropy'], ['best'], [16, 18, 25, 30, 35]) 
 
     # Test Decision Tree (when done tuning hyperparameters)
     # test_decision_tree(tree, X_test, y_test)
