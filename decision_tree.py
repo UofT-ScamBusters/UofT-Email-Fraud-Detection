@@ -1,6 +1,6 @@
 from typing import Any
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import accuracy_score
 from preprocessing import load_data
 import pickle
 
@@ -128,7 +128,7 @@ def save_model(X_train, y_train) -> None:
     """         
     tree = create_decision_tree(X_train, y_train)
 
-    with open('decision_tree.pkl', 'wb') as f:
+    with open('data/decision_tree.pkl', 'wb') as f:
         pickle.dump(tree, f)
 
 def predict(X) -> Any:
@@ -138,7 +138,7 @@ def predict(X) -> Any:
     Returns:
         None
     """
-    with open('decision_tree.pkl', 'rb') as f:
+    with open('data/decision_tree.pkl', 'rb') as f:
         tree = pickle.load(f)
 
     predictions = tree.predict(X)
@@ -147,6 +147,7 @@ def predict(X) -> Any:
 if __name__ == "__main__":
     X_train, X_valid, X_test, y_train, y_valid, y_test = load_data()
 
+    # TODO: Train Decision Tree 
     run_train_valid(X_train, y_train, X_valid, y_valid)
 
     # TODO: if you want to batch test hyperparameters, uncomment the following line and input ur own parameters.
