@@ -1,6 +1,8 @@
+from typing import Any
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score, classification_report
 from preprocessing import load_data
+import pickle
 
 # Tree Hyperparameters
 CRITERION = 'gini' # ['gini', 'entropy']
@@ -117,14 +119,39 @@ def run_train_valid(X_train, y_train, X_valid, y_valid) -> None:
     report_training_accuracy(tree, X_train, y_train)
     validate_decision_tree(tree, X_valid, y_valid)
 
+def save_model(X_train, y_train) -> None:
+    """
+    Saves the decision tree model to a pickle file to reduce computation time later.
+
+    Returns:
+        None    
+    """         
+    tree = create_decision_tree(X_train, y_train)
+
+    with open('decision_tree.pkl', 'wb') as f:
+        pickle.dump(tree, f)
+
+def predict(X) -> Any:
+    """
+    Predicts the target values for the input features.
+
+    Returns:
+        None
+    """
+    with open('decision_tree.pkl', 'rb') as f:
+        tree = pickle.load(f)
+
+    predictions = tree.predict(X)
+    return predictions
+
 if __name__ == "__main__":
     X_train, X_valid, X_test, y_train, y_valid, y_test = load_data()
 
     run_train_valid(X_train, y_train, X_valid, y_valid)
 
     # TODO: if you want to batch test hyperparameters, uncomment the following line and input ur own parameters.
-    try_hyperparameters(X_train, y_train, X_valid, y_valid, ['gini', 'entropy'], ['best'], [16, 18, 25, 30, 35]) 
+    # try_hyperparameters(X_train, y_train, X_valid, y_valid, ['gini', 'entropy'], ['best'], [16, 18, 25, 30, 35]) 
 
-    # Test Decision Tree (when done tuning hyperparameters)
+    # TODO: Test Decision Tree (when done tuning hyperparameters)
     # test_decision_tree(tree, X_test, y_test)
 
