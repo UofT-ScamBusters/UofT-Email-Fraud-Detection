@@ -143,10 +143,7 @@ if __name__ == "__main__":
     X_train, X_valid, X_test, y_train, y_valid, y_test = load_data()
     train_loader, valid_loader, test_loader = load_data_for_nn(X_train, X_valid, X_test, y_train, y_valid, y_test)
     
-    input_size = X_train.shape[1]
-    output_size = 1 # for binary classification, output_size should be 1
-    
-    model = NeuralNetwork(input_size, HIDDEN_SIZE, output_size)
+    model = NeuralNetwork(input_size=X_train.shape[1], hidden_size=HIDDEN_SIZE, output_size=1) # for binary classification, output_size should be 1
     criterion = nn.BCELoss() # binary cross entropy loss
     optimizer = optim.SGD(model.parameters(), lr=LEARNING_RATE, weight_decay=LAMBDA) # stochastic gradient descent
     
