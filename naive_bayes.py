@@ -126,6 +126,20 @@ def plot_roc_curve(model, X_test, y_test):
     plt.savefig("visualizations/roc_curve_nb.png")
     plt.show()
 
+def make_model_and_predict(X_train, y_train, X_prediction):
+    """
+    Creates and trains a Naive Bayes classifier and makes predictions.
+    (I made this function just so I don't have to create the model in ensemble.py)
+    Args:
+        X_train (array-like): The input features for training.
+        y_train (array-like): The target values for training.
+        X_prediction (array-like): The input features for prediction.
+    Returns:
+        array-like: The predicted target values
+    """
+    model = create_naive_bayes(X_train, y_train)
+    return predict_naive_bayes(model, X_prediction)
+
 if __name__ == "__main__":
     # test data is just kaggle data
     # X_train, X_valid, X_test, y_train, y_valid, y_test = load_data()

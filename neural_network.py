@@ -7,6 +7,7 @@ from torch.utils.data import DataLoader, TensorDataset
 from preprocessing import load_data, load_data_uoft_kaggle_merged_test, load_data_uoft_kaggle_separate_test
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, roc_curve, auc
+import pickle
 
 # Neural Network Hyperparameters
 HIDDEN_SIZE = 50 # number of neurons in the hidden layer
@@ -233,6 +234,19 @@ def plot_roc_curve(model, data_loader):
     plt.legend(loc="lower right")
     plt.savefig("visualizations/roc_curve_nn.png")
     plt.show()
+
+def create_and_save_model(train_loader, valid_loader):
+    model = NeuralNetwork(input_size=X_train.shape[1], hidden_size=HIDDEN_SIZE, output_size=1) # for binary classification, output_size should be 1
+    criterion = nn.BCELoss() # binary cross entropy loss
+    optimizer = optim.SGD(model.parameters(), lr=LEARNING_RATE, weight_decay=LAMBDA) # stochastic gradient descent
+    
+    # train(model, criterion, optimizer, train_loader, valid_loader, NUM_EPOCHS)
+    # Train the model and capture the loss and accuracy
+    train_losses, valid_accuracies = train(model, criterion, optimizer, train_loader, valid_loader, NUM_EPOCHS)
+    
+    # Save model
+    with open('data/nn.pkl', 'wb') as file:
+        pickle.dump(model, file)
 
 if __name__ == "__main__":
     # test data is just kaggle data
