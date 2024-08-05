@@ -53,13 +53,14 @@ def vectorize_data(data, uoft_data=None):
     vectorizer = TfidfVectorizer(stop_words="english", max_features=10000)
     X_train = vectorizer.fit_transform(data["Email Text"]).toarray()
     y_train = np.array(data["Email Type"])
+    feature_names = vectorizer.get_feature_names_out()
     
     if uoft_data is not None:
         X_uoft = vectorizer.transform(uoft_data["Email Text"]).toarray()
         y_uoft = np.array(uoft_data["Email Type"])
-        return X_train, X_uoft, y_train, y_uoft
+        return X_train, X_uoft, y_train, y_uoft, feature_names
     
-    return X_train, y_train
+    return X_train, y_train, feature_names
 
 def split_data(X, y):
     # split data into train (70%), validation (15%), test sets (15%)
@@ -69,25 +70,26 @@ def split_data(X, y):
 
 def load_data():
     kaggle_data, uoft_data = preprocess_data()
-    X, X_uoft, y, y_uoft = vectorize_data(kaggle_data, uoft_data)
+    X, X_uoft, y, y_uoft, feature_names = vectorize_data(kaggle_data, uoft_data)
     X_train, X_valid, X_test, y_train, y_valid, y_test = split_data(X, y)
-    return X_train, X_valid, X_test, y_train, y_valid, y_test
+    return X_train, X_valid, X_test, y_train, y_valid, y_test, feature_names
 
 def load_data_uoft_kaggle_merged_test():
     kaggle_data, uoft_data = preprocess_data()
-    X, X_uoft, y, y_uoft = vectorize_data(kaggle_data, uoft_data)
+    X, X_uoft, y, y_uoft, feature_names = vectorize_data(kaggle_data, uoft_data)
     X_train, X_valid, X_test, y_train, y_valid, y_test = split_data(X, y)
     # include uoft data in test set
     X_test = np.concatenate((X_test, X_uoft), axis=0)
     y_test = np.concatenate((y_test, y_uoft), axis=0)
-    return X_train, X_valid, X_test, y_train, y_valid, y_test
+    return X_train, X_valid, X_test, y_train, y_valid, y_test, feature_names
 
 def load_data_uoft_kaggle_separate_test():
     kaggle_data, uoft_data = preprocess_data()
-    X, X_uoft, y, y_uoft = vectorize_data(kaggle_data, uoft_data)
+    X, X_uoft, y, y_uoft, feature_names = vectorize_data(kaggle_data, uoft_data)
     X_train, X_valid, X_test, y_train, y_valid, y_test = split_data(X, y)
     # have 2 test sets, one for kaggle and one for uoft
-    return X_train, X_valid, X_test, y_train, y_valid, y_test, X_uoft, y_uoft
+    return X_train, X_valid, X_test, y_train, y_valid, y_test, X_uoft, y_uoft, feature_names
+
 
 def create_wordcloud(data, title, filter_label=None, file_name=None):
     if filter_label is not None:
@@ -137,5 +139,5 @@ def show_visualizations():
 
 if __name__ == '__main__':
     show_visualizations()
-    
+
     

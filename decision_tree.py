@@ -1,8 +1,18 @@
 from typing import Any
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import accuracy_score
+from sklearn.tree import DecisionTreeClassifier, plot_tree 
+from sklearn.metrics import (
+    accuracy_score, 
+    classification_report, 
+    confusion_matrix, 
+    ConfusionMatrixDisplay, 
+    f1_score,
+    roc_curve, 
+    auc
+)
 from preprocessing import load_data
 import pickle
+import matplotlib.pyplot as plt
+import numpy as np
 
 # Tree Hyperparameters
 CRITERION = 'gini' # ['gini', 'entropy']
@@ -113,11 +123,12 @@ def run_train_valid(X_train, y_train, X_valid, y_valid) -> None:
     Trains and validates the decision tree for a single run.
 
     Returns:
-        None
+        DecisionTreeClassifier: The trained decision tree model.
     """
     tree = create_decision_tree(X_train, y_train)
     report_training_accuracy(tree, X_train, y_train)
     validate_decision_tree(tree, X_valid, y_valid)
+    return tree
 
 def save_model(X_train, y_train) -> None:
     """
@@ -144,15 +155,92 @@ def predict(X) -> Any:
     predictions = tree.predict(X)
     return predictions
 
+def plot_confusion_matrix(y, predictions) -> None:
+    """
+    Creates a confusion matrix for the decision tree model.
+
+    Returns:
+        None
+    """
+    clf = confusion_matrix(y, predictions)
+    cx = ConfusionMatrixDisplay(clf, display_labels=['Phishing Email', 'Safe Email']).plot(cmap="RdPu")
+    plt.title("Confusion Matrix for Decision Tree")
+    plt.savefig("visualizations/confusion_matrix_decision_tree.png")
+    plt.show()
+
+def plot_feature_importance(feature_names, tree, top_n=10) -> None:
+    """
+    Plots the feature importance of the decision tree model.
+
+    Returns:
+        None
+    """
+    importances = tree.feature_importances_
+    indices = np.argsort(importances)[::-1]
+    top_indices = indices[:top_n]
+
+    plt.figure()
+    plt.title("Feature Importances")
+    plt.bar(range(top_n), importances[top_indices], align="center")
+    plt.xticks(range(top_n), np.array(feature_names)[top_indices], rotation=90)
+    plt.tight_layout()
+    plt.savefig("visualizations/feature_importance_dt.png")
+    plt.show()
+
+
+def plot_decision_tree(tree, feature_names) -> None:
+    """
+    Plots the decision tree model.
+
+    Returns:
+        None
+    """
+    plt.figure(figsize=(20, 20))
+    plot_tree(tree, filled=True, feature_names=feature_names, class_names=['Phishing Email', 'Safe Email'])
+    plt.title("Decision Tree")
+    plt.savefig("visualizations/decision_tree.png")
+    plt.show()
+
+def plot_roc_curve(tree, X_test, y_test) -> None:
+    """
+    Plots the ROC curve for the decision tree model.
+
+    Returns:
+        None
+    """
+    true_labels = y_test
+    predictions = predict(X_test)
+    fpr, tpr, _ = roc_curve(true_labels, predictions)
+    roc_auc = auc(fpr, tpr)
+
+    plt.figure()
+    plt.plot(fpr, tpr, color='darkorange', lw=2, label=f'ROC curve (area = {roc_auc:.2f})')
+    plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('ROC Curve')
+    plt.legend(loc="lower right")
+    plt.savefig("visualizations/roc_curve_dt.png")
+    plt.show()
+
 if __name__ == "__main__":
-    X_train, X_valid, X_test, y_train, y_valid, y_test = load_data()
+    X_train, X_valid, X_test, y_train, y_valid, y_test, feature_names = load_data()
 
     # TODO: Train Decision Tree 
-    run_train_valid(X_train, y_train, X_valid, y_valid)
+    tree = run_train_valid(X_train, y_train, X_valid, y_valid)
+    plot_feature_importance(feature_names, tree)
+
+    # TODO: NEED TO FIX THIS BECAUSE THE DECISION TREE IS WAY TOO BIG.. MAYBE JUST SHOW A PORTION OF IT?
+    # plot_decision_tree(tree, feature_names)
 
     # TODO: if you want to batch test hyperparameters, uncomment the following line and input ur own parameters.
     # try_hyperparameters(X_train, y_train, X_valid, y_valid, ['gini', 'entropy'], ['best'], [16, 18, 25, 30, 35]) 
 
     # TODO: Test Decision Tree (when done tuning hyperparameters)
-    # test_decision_tree(tree, X_test, y_test)
-
+    tree = create_decision_tree(X_test, y_test)
+    test_decision_tree(tree, X_test, y_test)
+    pred_dtr = tree.predict(X_test)
+    plot_confusion_matrix(y_test, pred_dtr)
+    plot_roc_curve(tree, X_test, y_test)
