@@ -5,6 +5,7 @@ from naive_bayes import make_model_and_predict as predict_nb
 from preprocessing import load_data_uoft_kaggle_separate_test
 from typing import Any
 import pickle
+import numpy as np
 
 X_train, X_valid, X_test, y_train, y_valid, y_test, X_uoft, y_uoft, _ = load_data_uoft_kaggle_separate_test()
 
@@ -26,8 +27,9 @@ def predict_ensemble(X, X_for_nn) -> Any:
 
     print("finished nb")
 
-    # Take avg of results and round (i.e. a vote!)
-    predictions = (predictions_dt + predictions_nn + predictions_nb) // 3
+    # take the mode for each index of each prediction (i.e. a vote)
+    # predictions = (predictions_dt + predictions_nn + predictions_nb) // 3
+    predictions = np.array([np.argmax(np.bincount([predictions_dt[i], predictions_nn[i], predictions_nb[i]])) for i in range(len(predictions_dt))])
     return predictions
 
 def report_accuracy(predictions, y) -> None:
