@@ -163,9 +163,9 @@ def plot_confusion_matrix(y, predictions) -> None:
         None
     """
     clf = confusion_matrix(y, predictions)
-    cx = ConfusionMatrixDisplay(clf, display_labels=['Phishing Email', 'Safe Email']).plot(cmap="RdPu")
+    cx = ConfusionMatrixDisplay(clf, display_labels=['Phishing', 'Safe']).plot(cmap="RdPu")
     plt.title("Confusion Matrix for Decision Tree")
-    plt.savefig("visualizations/confusion_matrix_decision_tree.png")
+    plt.savefig("visualizations/confusion_matrix_dt.png")
     plt.show()
 
 def plot_feature_importance(feature_names, tree, top_n=10) -> None:
@@ -196,7 +196,7 @@ def plot_decision_tree(tree, feature_names) -> None:
         None
     """
     plt.figure(figsize=(20, 20))
-    plot_tree(tree, filled=True, feature_names=feature_names, class_names=['Phishing Email', 'Safe Email'])
+    plot_tree(tree, filled=True, feature_names=feature_names, class_names=['Phishing', 'Safe'])
     plt.title("Decision Tree")
     plt.savefig("visualizations/decision_tree.png")
     plt.show()

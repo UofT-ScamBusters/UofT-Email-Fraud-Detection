@@ -168,7 +168,7 @@ def plot_confusion_matrix(model, data_loader):
             true_labels.extend(labels.squeeze().cpu().numpy())
             predictions.extend(predicted.squeeze().cpu().numpy())
     cm = confusion_matrix(true_labels, predictions)        
-    cm_display = ConfusionMatrixDisplay(cm, display_labels=['Phishing Email', 'Safe Email']).plot(cmap='Blues')
+    cm_display = ConfusionMatrixDisplay(cm, display_labels=['Phishing', 'Safe']).plot(cmap='Blues')
     plt.title("Confusion Matrix for Neural Network")
     plt.savefig("visualizations/confusion_matrix_nn.png")
     plt.show()

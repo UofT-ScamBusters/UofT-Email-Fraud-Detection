@@ -43,7 +43,7 @@ def report_training_accuracy(model, X_train, y_train) -> float:
     Calculate and print the training accuracy of the Naive Bayes classifier.
     Args:
         model (MultinomialNB): The trained Naive Bayes model.
-        X_train (array-like): The input features for training.
+        X_train: The input features for training.
         y_train (array-like): The target values for training.
     Returns:
        float: The training accuracy
@@ -96,9 +96,9 @@ def plot_confusion_matrix(model, X_test, y_test):
     """
     test_pred = model.predict(X_test)
     cm = confusion_matrix(y_test, test_pred)
-    cx = ConfusionMatrixDisplay(cm, display_labels=['Phishing Email', 'Safe Email']).plot(cmap="YlGn")
+    cx = ConfusionMatrixDisplay(cm, display_labels=['Phishing', 'Safe']).plot(cmap="YlGn")
     plt.title("Confusion Matrix for Naive Bayes")
-    plt.savefig("visualizations/confusion_matrix_naive_bayes.png")
+    plt.savefig("visualizations/confusion_matrix_nb.png")
     plt.show()
 
 def plot_roc_curve(model, X_test, y_test):
