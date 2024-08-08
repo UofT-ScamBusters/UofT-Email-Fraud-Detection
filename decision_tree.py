@@ -9,7 +9,7 @@ from sklearn.metrics import (
     roc_curve, 
     auc
 )
-from preprocessing import load_data
+from preprocessing import load_data, load_data_uoft_kaggle_merged_test, load_data_uoft_kaggle_separate_test
 import pickle
 import matplotlib.pyplot as plt
 import numpy as np
@@ -130,7 +130,7 @@ def run_train_valid(X_train, y_train, X_valid, y_valid) -> None:
     validate_decision_tree(tree, X_valid, y_valid)
     return tree
 
-def save_model(X_train, y_train) -> None:
+def save_model(X_train, y_train, filename: str) -> None:
     """
     Saves the decision tree model to a pickle file to reduce computation time later.
 
@@ -139,8 +139,19 @@ def save_model(X_train, y_train) -> None:
     """         
     tree = create_decision_tree(X_train, y_train)
 
-    with open('data/decision_tree.pkl', 'wb') as f:
+    with open(filename, 'wb') as f:
         pickle.dump(tree, f)
+
+def load_model(filename: str) -> DecisionTreeClassifier:
+    """
+    Loads the decision tree model from a pickle file.
+
+    Returns:
+        DecisionTreeClassifier: The loaded decision tree model.
+    """
+    with open(filename, 'rb') as f:
+        tree = pickle.load(f)
+    return tree
 
 def predict(X) -> Any:
     """
@@ -226,11 +237,19 @@ def plot_roc_curve(tree, X_test, y_test) -> None:
     plt.show()
 
 if __name__ == "__main__":
-    X_train, X_valid, X_test, y_train, y_valid, y_test, feature_names = load_data()
+    X_train, X_valid, X_test, y_train, y_valid, y_test, X_uoft, y_uoft, feature_names = load_data_uoft_kaggle_separate_test()
+
+    tree = load_model('data/decision_tree.pkl')
+
+    report_training_accuracy(tree, X_train, y_train)
+    validate_decision_tree(tree, X_valid, y_valid)
+    test_decision_tree(tree, X_test, y_test)
+    print('uoft spam test')
+    test_decision_tree(tree, X_uoft, y_uoft)
 
     # TODO: Train Decision Tree 
-    tree = run_train_valid(X_train, y_train, X_valid, y_valid)
-    plot_feature_importance(feature_names, tree)
+    # tree = run_train_valid(X_train, y_train, X_valid, y_valid)
+    # plot_feature_importance(feature_names, tree)
 
     # TODO: NEED TO FIX THIS BECAUSE THE DECISION TREE IS WAY TOO BIG.. MAYBE JUST SHOW A PORTION OF IT?
     # plot_decision_tree(tree, feature_names)
@@ -239,8 +258,8 @@ if __name__ == "__main__":
     # try_hyperparameters(X_train, y_train, X_valid, y_valid, ['gini', 'entropy'], ['best'], [16, 18, 25, 30, 35]) 
 
     # TODO: Test Decision Tree (when done tuning hyperparameters)
-    tree = create_decision_tree(X_test, y_test)
-    test_decision_tree(tree, X_test, y_test)
-    pred_dtr = tree.predict(X_test)
-    plot_confusion_matrix(y_test, pred_dtr)
-    plot_roc_curve(tree, X_test, y_test)
+    # tree = create_decision_tree(X_test, y_test)
+    # test_decision_tree(tree, X_test, y_test)
+    # pred_dtr = tree.predict(X_test)
+    # plot_confusion_matrix(y_test, pred_dtr)
+    # plot_roc_curve(tree, X_test, y_test)
