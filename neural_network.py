@@ -169,7 +169,7 @@ def plot_confusion_matrix(model, data_loader):
             predictions.extend(predicted.squeeze().cpu().numpy())
     cm = confusion_matrix(true_labels, predictions)        
     cm_display = ConfusionMatrixDisplay(cm, display_labels=['Phishing', 'Safe']).plot(cmap='Blues')
-    plt.title("Confusion Matrix for Neural Network")
+    plt.title("Confusion Matrix for Neural Network Kaggle Data")
     plt.savefig("visualizations/confusion_matrix_nn.png")
     plt.show()
 
@@ -230,7 +230,7 @@ def plot_roc_curve(model, data_loader):
     plt.ylim([0.0, 1.05])
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
-    plt.title('ROC Curve')
+    plt.title('ROC Curve with Kaggle Data')
     plt.legend(loc="lower right")
     plt.savefig("visualizations/roc_curve_nn.png")
     plt.show()
