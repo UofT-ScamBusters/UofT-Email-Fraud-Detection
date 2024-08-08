@@ -175,7 +175,7 @@ def plot_confusion_matrix(y, predictions) -> None:
     """
     clf = confusion_matrix(y, predictions)
     cx = ConfusionMatrixDisplay(clf, display_labels=['Phishing', 'Safe']).plot(cmap="RdPu")
-    plt.title("Confusion Matrix for Decision Tree")
+    plt.title("Confusion Matrix for Decision Tree Kaggle Data")
     plt.savefig("visualizations/confusion_matrix_dt.png")
     plt.show()
 
@@ -231,7 +231,7 @@ def plot_roc_curve(tree, X_test, y_test) -> None:
     plt.ylim([0.0, 1.05])
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
-    plt.title('ROC Curve')
+    plt.title('ROC Curve with Kaggle Data')
     plt.legend(loc="lower right")
     plt.savefig("visualizations/roc_curve_dt.png")
     plt.show()
@@ -248,8 +248,8 @@ if __name__ == "__main__":
     test_decision_tree(tree, X_uoft, y_uoft)
 
     # TODO: Train Decision Tree 
-    # tree = run_train_valid(X_train, y_train, X_valid, y_valid)
-    # plot_feature_importance(feature_names, tree)
+    tree = run_train_valid(X_train, y_train, X_valid, y_valid)
+    plot_feature_importance(feature_names, tree)
 
     # TODO: NEED TO FIX THIS BECAUSE THE DECISION TREE IS WAY TOO BIG.. MAYBE JUST SHOW A PORTION OF IT?
     # plot_decision_tree(tree, feature_names)
